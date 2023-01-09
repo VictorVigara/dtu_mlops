@@ -1,9 +1,11 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
+from typing import Callable, Tuple, Union, Optional, List
+
 
 class Network(nn.Module):
-    def __init__(self, input_size, output_size, hidden_layers, drop_p=0.5):
+    def __init__(self, input_size: int, output_size: int, hidden_layers: List[int], drop_p=0.5) -> None:
         ''' Builds a feedforward network with arbitrary hidden layers.
 
             Arguments
@@ -25,7 +27,7 @@ class Network(nn.Module):
 
         self.dropout = nn.Dropout(p=drop_p)
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
         ''' Forward pass through the network, returns the output logits '''
 
         for each in self.hidden_layers:
