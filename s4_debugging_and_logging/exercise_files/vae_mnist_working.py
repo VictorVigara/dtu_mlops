@@ -4,12 +4,19 @@ https://github.com/Jackson-Kang/Pytorch-VAE-tutorial/blob/master/01_Variational_
 
 A simple implementation of Gaussian MLP Encoder and Decoder trained on MNIST
 """
+import os
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 from torchvision.utils import save_image
+from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
+import wandb
+import matplotlib.pyplot as plt
+
+wandb.init(project="experiment1", entity="prueba999")
+
 
 # Model Hyperparameters
 dataset_path = 'datasets'
@@ -20,7 +27,14 @@ x_dim  = 784
 hidden_dim = 400
 latent_dim = 20
 lr = 1e-3
-epochs = 5
+epochs = 10
+
+# Capture a dictionary of hyperparameters with config
+wandb.config = {
+  "learning_rate": lr,
+  "epochs": epochs,
+  "batch_size": batch_size
+}
 
 
 # Data loading
@@ -99,9 +113,9 @@ def loss_function(x, x_hat, mean, log_var):
 
 optimizer = Adam(model.parameters(), lr=lr)
 
-
 print("Start training VAE...")
 model.train()
+epoch_loss = []
 for epoch in range(epochs):
     overall_loss = 0
     for batch_idx, (x, _) in enumerate(train_loader):
@@ -117,8 +131,26 @@ for epoch in range(epochs):
         
         loss.backward()
         optimizer.step()
-    print("\tEpoch", epoch + 1, "complete!", "\tAverage Loss: ", overall_loss / (batch_idx*batch_size))    
+    
+    # Log metrics inside your training loop to visualize model performance
+    wandb.log({"loss_it": overall_loss / (batch_idx*batch_size)})
+    print("\tEpoch", epoch + 1, "complete!", "\tAverage Loss: ", overall_loss / (batch_idx*batch_size))   
+    
+
 print("Finish!!")
+
+project_dir = os.getcwd()
+print(project_dir)
+
+plt.figure()
+plt.plot(range(epochs), epoch_loss)
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.title("Training Loss")
+plt.savefig(project_dir+'/s4_debugging_and_logging/exercise_files/loss.png')
+
+wandb.log({'loss_plot': wandb.Image(project_dir+'/s4_debugging_and_logging/exercise_files/loss.png')})
+
 
 # Generate reconstructions
 model.eval()

@@ -51,7 +51,7 @@ class Encoder(nn.Module):
         return z, mean, log_var
        
     def reparameterization(self, mean, var):
-        epsilon = torch.randn(*var.shape)
+        epsilon = torch.randn(*var.shape).to(DEVICE)
         
         z = mean + var*epsilon
         
@@ -61,7 +61,7 @@ class Decoder(nn.Module):
     def __init__(self, latent_dim, hidden_dim, output_dim):
         super(Decoder, self).__init__()
         self.FC_hidden = nn.Linear(latent_dim, hidden_dim)
-        self.FC_output = nn.Linear(latent_dim, output_dim)
+        self.FC_output = nn.Linear(hidden_dim, output_dim)
         
     def forward(self, x):
         h     = torch.relu(self.FC_hidden(x))
@@ -104,6 +104,7 @@ model.train()
 for epoch in range(epochs):
     overall_loss = 0
     for batch_idx, (x, _) in enumerate(train_loader):
+        optimizer.zero_grad()
         x = x.view(batch_size, x_dim)
         x = x.to(DEVICE)
 

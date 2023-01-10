@@ -131,8 +131,15 @@ dmypy.json
 # hydra logging folder
 outputs/
 
+# wandb outputs
+wandb/
+
 # datasets
 FashionMNIST/
 
 # vs code
 .vscode/settings.json
+
+/log/
+
+/datasets/
